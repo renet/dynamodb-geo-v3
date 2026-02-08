@@ -13,18 +13,26 @@ export class S2Util {
     let latLngRect: S2LatLngRect = null;
 
     if (minPoint != null && maxPoint != null) {
+      // Normalize longitude to [-180, 180] range to handling antimeridian crossing
+      let minLng = minPoint.longitude;
+      let maxLng = maxPoint.longitude;
+
+      while (minLng < -180) minLng += 360;
+      while (minLng > 180) minLng -= 360;
+      while (maxLng < -180) maxLng += 360;
+      while (maxLng > 180) maxLng -= 360;
+
       const minLatLng = S2LatLng.fromDegrees(
         minPoint.latitude,
-        minPoint.longitude
+        minLng
       );
       const maxLatLng = S2LatLng.fromDegrees(
         maxPoint.latitude,
-        maxPoint.longitude
+        maxLng
       );
 
       latLngRect = S2LatLngRect.fromLatLng(minLatLng, maxLatLng);
     }
-
     return latLngRect;
   }
 
@@ -55,13 +63,23 @@ export class S2Util {
     const lngForRadius =
       radiusInMeter / centerLatLng.getEarthDistance(lngReferenceLatLng);
 
+    let minLng = centerPoint.longitude - lngForRadius;
+    let maxLng = centerPoint.longitude + lngForRadius;
+
+    // Normalize longitude to [-180, 180] range to handling antimeridian crossing
+    // If the bounding box crosses the antimeridian, minLng will be > maxLng after normalization
+    while (minLng < -180) minLng += 360;
+    while (minLng > 180) minLng -= 360;
+    while (maxLng < -180) maxLng += 360;
+    while (maxLng > 180) maxLng -= 360;
+
     const minLatLng = S2LatLng.fromDegrees(
       centerPoint.latitude - latForRadius,
-      centerPoint.longitude - lngForRadius
+      minLng
     );
     const maxLatLng = S2LatLng.fromDegrees(
       centerPoint.latitude + latForRadius,
-      centerPoint.longitude + lngForRadius
+      maxLng
     );
 
     return S2LatLngRect.fromLatLng(minLatLng, maxLatLng);
