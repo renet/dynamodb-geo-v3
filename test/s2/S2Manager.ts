@@ -13,4 +13,8 @@ describe('S2Manager', () => {
     it('generateHashKey', () => {
         expect(S2Manager.generateHashKey(Long.fromString('5177531549489041509', false, 10), 6).toNumber()).to.equal(517753);
     });
+
+    it('generateHashKey does not divide by zero when the geohash is shorter than hashKeyLength', () => {
+        expect(S2Manager.generateHashKey(Long.fromString('12345', false, 10), 6).toNumber()).to.equal(12345);
+    });
 });
