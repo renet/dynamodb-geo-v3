@@ -32,7 +32,10 @@ export class S2Manager {
     }
 
     const geohashString = geohash.toString(10);
-    const denominator = Math.pow(10, geohashString.length - hashKeyLength);
+    // Clamp to 0 so a geohash shorter than hashKeyLength doesn't yield a
+    // fractional denominator, which Long truncates to 0 (division by zero).
+    const exponent = Math.max(0, geohashString.length - hashKeyLength);
+    const denominator = Math.pow(10, exponent);
     return geohash.divide(denominator);
   }
 }
